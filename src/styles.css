@@ -1,0 +1,1560 @@
+/* =========================================================
+   BASE & RESET
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  /* Color de respaldo mientras carga la imagen de fondo */
+  background-color: #dcecfb;
+
+  color: var(--cfont);
+
+  font-family: var(--font-body);
+}
+
+/*
+  Fondo fijo real (en vez de background-attachment: fixed).
+
+  background-attachment: fixed obliga al navegador a recalcular
+  y repintar la imagen de fondo del body en cada frame del scroll
+  (especialmente en mobile), lo que genera el "tildado"/freeze
+  mientras se desliza.
+
+  Usando un pseudo-elemento con position: fixed en su lugar, el
+  fondo pasa a su propia capa de composición: el navegador solo
+  la posiciona una vez y no necesita repintarla al hacer scroll.
+  Las secciones (que sí se desplazan) quedan por encima, ya que
+  este pseudo-elemento tiene z-index negativo.
+*/
+body::before {
+
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  z-index: -1;
+
+  background:
+    linear-gradient(
+      rgba(255,255,255,.60),
+      rgba(255,255,255,.60)
+    ),
+    url("assets/Fondos/fondo_flores_celestes_2.jpeg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /*
+    Fuerza a que este fondo tenga su PROPIA capa de composición
+    (GPU) desde el primer render, en vez de que el navegador
+    recién la cree al empezar el gesto de scroll.
+
+    Sin esto, en Chrome/Safari mobile —sobre todo cuando la
+    barra de direcciones se oculta o aparece durante el
+    deslizamiento— el navegador puede "soltar" momentáneamente
+    la capa fija y dejar ver por una fracción de segundo el
+    color de respaldo del body en vez de la imagen (el
+    rectángulo celeste liso que se ve en el medio de la
+    pantalla). Con la capa ya composited de antemano, eso no
+    vuelve a suceder.
+  */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  will-change: transform;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+
+/* =========================================================
+   PALETA
+========================================================= */
+
+:root {
+
+  --cfont: #FFFFFF;
+  --cfont-light: #FFFFFF;
+  --cfont-muted: #FFFFFF;
+  --cfont-dark: #FFFFFF;
+
+  --cfont-border: rgba(255,255,255,.45);
+  --cfont-shadow: rgba(40,55,75,.15);
+
+  /* Celeste utilizado para los radios */
+  --celeste: #A9D6F5;
+
+  /* =======================================================
+     TIPOGRAFÍAS (mapeo exacto extraído del Boceto.pdf)
+
+     - font-body   → BaskervilleDisplayPT (Boceto, de pago)
+                     reemplazo gratuito: Baskervville
+                     Uso: párrafos de texto (direcciones, descripciones)
+
+     - font-caps   → CormorantSC-Regular (Boceto, gratis: match exacto)
+                     Uso: encabezados en versalitas
+                     ("NOS CASAMOS", "PARROQUIA...", "ELEGANTE", etc.)
+
+     - font-script → Revive80Signature (Boceto, de pago)
+                     reemplazo gratuito: Mrs Saint Delafield
+                     Uso: nombres y títulos de sección estilo firma
+
+     - font-accent → CinzelDecorative (Boceto, gratis: match exacto)
+                     Uso: contador, horarios, botón "Ver Ubicación"
+                     (regular para texto, 700/bold para botones)
+  ======================================================= */
+  --font-body: "Baskervville", serif;
+  --font-caps: "Cormorant SC", serif;
+  --font-script: "Mrs Saint Delafield", cursive;
+  --font-accent: "Cinzel Decorative", cursive;
+
+}
+
+
+/* =========================================================
+   PÁRRAFOS
+========================================================= */
+
+section p {
+
+  font-size: 1.25rem;
+  line-height: 1.9;
+
+  font-weight: 600;
+
+  color: #FFFFFF;
+}
+
+
+/* =========================================================
+   TIPOGRAFÍA UTILITARIA
+========================================================= */
+
+.display {
+
+  font-family: var(--font-caps);
+
+  font-weight: 400;
+  color: #FFFFFF;
+}
+
+.script {
+
+  font-family: var(--font-script);
+  font-weight: 400;
+}
+
+.time {
+
+  /* Horarios sueltos (ej. "| 18:00 hs |") — en el Boceto usan
+     Cinzel Decorative, distinto del resto de textos .display */
+  font-family: var(--font-accent);
+}
+
+.label {
+
+  font-family: var(--font-caps);
+
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  color: #FFFFFF;
+}
+
+
+/* =========================================================
+   PORTADA
+========================================================= */
+
+.cover {
+
+  position: fixed;
+  inset: 0;
+
+  z-index: 50;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100vw;
+  height: 100vh;
+
+  overflow: hidden;
+
+  /*
+    La portada tiene su propio fondo.
+    De esta manera NO se transparenta el contenido
+    de las secciones que están detrás.
+  */
+  background: #dcecfb;
+
+  transition: opacity 0.8s ease;
+}
+
+
+/* =========================================================
+   FONDO DIFUMINADO DE LA PORTADA
+========================================================= */
+
+.cover::before {
+
+  content: "";
+
+  position: absolute;
+
+  inset: -20px;
+
+  background:
+    linear-gradient(
+      rgba(255,255,255,.25),
+      rgba(255,255,255,.25)
+    ),
+    url("assets/Fondos/fondo_flores_celestes_2.jpeg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  filter: blur(8px);
+
+  transform: scale(1.05);
+
+  z-index: -1;
+}
+
+
+/* =========================================================
+   PORTADA OCULTA
+========================================================= */
+
+.cover.hidden {
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   SOBRE
+========================================================= */
+
+.cover img {
+
+  position: relative;
+
+  z-index: 2;
+
+  width: min(560px, 80vw);
+
+  box-shadow:
+    0 30px 60px -25px
+    rgba(80,72,56,.35);
+
+  border-radius: 4px;
+}
+
+
+/* =========================================================
+   TEXTO "TOCÁ PARA COMENZAR"
+========================================================= */
+
+.cover .hint {
+
+  position: relative;
+
+  z-index: 2;
+
+  margin-top: 2.5rem;
+
+  color: #FFFFFF;
+
+  text-shadow:
+    0 1px 2px rgba(80,80,80,.25);
+}
+
+
+/* =========================================================
+   HOJAS DECORATIVAS DE LA PORTADA
+========================================================= */
+
+.leaves {
+
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+
+  opacity: .4;
+
+  pointer-events: none;
+
+  z-index: 1;
+}
+
+.leaves svg {
+
+  position: absolute;
+
+  color: #FFFFFF;
+
+  height: 80%;
+  width: 6rem;
+}
+
+.leaves .l {
+
+  left: .5rem;
+  top: 2.5rem;
+}
+
+.leaves .r {
+
+  right: .5rem;
+  top: 2.5rem;
+
+  transform: scaleX(-1);
+}
+
+
+/* =========================================================
+   MÓVIL
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .cover img {
+
+    width: min(560px, 80vw);
+
+  }
+
+}
+
+/* =========================================================
+   HOJAS DECORATIVAS
+========================================================= */
+
+.leaves {
+
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+
+  opacity: .4;
+
+  pointer-events: none;
+}
+
+.leaves svg {
+
+  position: absolute;
+
+  color: #FFFFFF;
+
+  height: 80%;
+  width: 6rem;
+}
+
+.leaves .l {
+
+  left: .5rem;
+  top: 2.5rem;
+}
+
+.leaves .r {
+
+  right: .5rem;
+  top: 2.5rem;
+
+  transform: scaleX(-1);
+}
+
+
+/* =========================================================
+   CONTENIDO PRINCIPAL
+========================================================= */
+
+.content {
+
+  display: none;
+
+  animation: fade 1.2s ease;
+}
+
+.content.show {
+
+  display: block;
+}
+
+@keyframes fade {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+section {
+
+  position: relative;
+
+  width: min(90%, 1000px);
+
+  min-height: 80dvh;
+
+  margin: 1.5rem auto;
+
+  padding: 2rem;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  text-align: center;
+
+  border-radius: 30px;
+
+  background: transparent;
+
+  border:
+    1px solid var(--cfont-border);
+
+  box-shadow:
+    0 10px 30px var(--cfont-shadow);
+}
+
+section::before {
+
+  content: "";
+
+  position: absolute;
+
+  inset: 12px;
+
+  border-radius: 20px;
+
+  border:
+    1px solid var(--cfont-border);
+
+  pointer-events: none;
+}
+
+section.hero {
+
+  min-height: 100vh;
+}
+
+
+/* =========================================================
+   ÍCONO CIRCULAR DE CADA SECCIÓN
+========================================================= */
+
+.section-icon {
+
+  position: relative;
+
+  z-index: 5;
+
+  width: 82px;
+  height: 82px;
+
+  margin-bottom: 1.5rem;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(255,255,255,.75);
+
+  box-shadow:
+    0 5px 18px rgba(40,55,75,.18);
+
+  background: rgba(255,255,255,.10);
+}
+
+.section-icon img {
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  border-radius: 50%;
+}
+
+
+/* =========================================================
+   CORAZÓN + LÍNEAS DECORATIVAS
+========================================================= */
+
+.heart-ornament {
+
+  width: 14rem;
+
+  height: 2rem;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 1rem;
+
+  color: #FFFFFF;
+}
+
+.heart-ornament span:not(.heart) {
+
+  height: 1px;
+
+  flex: 1;
+
+  background:
+    rgba(255,255,255,.9);
+}
+
+.heart-ornament .heart {
+
+  flex: 0 0 auto;
+
+  font-family: var(--font-body);
+
+  font-size: 1.5rem;
+
+  line-height: 1;
+
+  color: #FFFFFF;
+
+  text-shadow:
+    0 2px 8px
+    rgba(245,242,236,.7);
+}
+
+
+/* =========================================================
+   DECORACIÓN LATERAL
+========================================================= */
+
+.deco {
+
+  position: absolute;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  opacity: .3;
+
+  pointer-events: none;
+}
+
+.deco svg {
+
+  position: absolute;
+
+  color: #FFFFFF;
+
+  width: 5rem;
+  height: 60%;
+}
+
+.deco .l {
+
+  left: -1rem;
+  top: 2.5rem;
+}
+
+.deco .r {
+
+  right: -1rem;
+  bottom: 2.5rem;
+
+  transform: scaleX(-1);
+}
+
+
+/* =========================================================
+   MONOGRAMA / TIPOGRAFÍA
+========================================================= */
+
+.mono {
+
+  font-family: var(--font-script);
+
+  letter-spacing: .02em;
+
+  color: #FFFFFF;
+}
+
+.mono .big {
+
+  font-size: 2.6rem;
+
+  line-height: 1;
+}
+
+.mono .amp {
+
+  font-size: 1.6rem;
+
+  margin:
+    0 .15em;
+
+  opacity: .7;
+}
+
+h1.name {
+
+  font-family: var(--font-script);
+
+  font-weight: 400;
+
+  font-size: 5rem;
+
+  line-height: 1;
+
+  margin: 0;
+
+  color: #FFFFFF;
+
+  text-shadow:
+    0 2px 8px
+    rgba(245,242,236,.7);
+}
+
+.amp-big {
+
+  font-family: var(--font-script);
+
+  color: #FFFFFF;
+
+  font-size: 3rem;
+
+  margin: .25rem 0;
+
+  text-shadow:
+    0 2px 8px
+    rgba(245,242,236,.7);
+}
+
+.quote {
+
+  font-family: var(--font-script);
+
+  font-size: 2.5rem;
+
+  color: #FFFFFF;
+
+  text-shadow:
+    0 2px 8px
+    rgba(245,242,236,.7);
+}
+
+.ornament {
+
+  height: 2rem;
+
+  width: 14rem;
+
+  color: #FFFFFF;
+}
+
+
+/* =========================================================
+   AGENDAR FECHA
+========================================================= */
+
+.save-date {
+
+  overflow: hidden;
+}
+
+.save-date-text {
+
+  font-family: var(--font-body);
+
+  max-width: 700px;
+
+  font-size: 1.4rem;
+
+  line-height: 1.7;
+
+  color: #FFFFFF;
+}
+
+.save-date-date {
+
+  font-family: var(--font-accent);
+
+  font-size: 1.6rem;
+
+  font-weight: 600;
+
+  color: #FFFFFF;
+}
+
+.calendar-image {
+
+  width: min(500px, 90%);
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.calendar-image img {
+
+  width: 100%;
+
+  max-height: 430px;
+
+  object-fit: contain;
+
+  border-radius: 16px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.35);
+
+  box-shadow:
+    0 8px 25px
+    rgba(40,55,75,.15);
+}
+
+
+/* =========================================================
+   UTILIDADES DE ESPACIADO
+========================================================= */
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.mt-1 {
+  margin-top: .25rem;
+}
+
+.mt-2 {
+  margin-top: .5rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
+.mt-12 {
+  margin-top: 3rem;
+}
+
+.mt-14 {
+  margin-top: 3.5rem;
+}
+
+.self-center {
+  align-self: center;
+}
+
+
+/* =========================================================
+   COLORES
+========================================================= */
+
+.muted {
+  color: #FFFFFF !important;
+}
+
+.label-soft {
+  color: #FFFFFF !important;
+}
+
+.italic {
+  font-style: italic;
+}
+
+
+/* =========================================================
+   CUENTA REGRESIVA
+========================================================= */
+
+.countdown {
+
+  display: flex;
+
+  gap: 1.5rem;
+
+  margin-top: 3.5rem;
+
+  color: #FFFFFF;
+}
+
+.countdown .u {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+.countdown .v {
+
+  font-family: var(--font-accent);
+
+  font-size: 2.25rem;
+
+  color: #FFFFFF;
+
+  text-shadow:
+    0 2px 8px
+    rgba(245,242,236,.7);
+}
+
+.countdown .l {
+
+  margin-top: .5rem;
+
+  color: #FFFFFF;
+
+  letter-spacing: .35em;
+
+  text-transform: uppercase;
+
+  font-size: .95rem;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.btn {
+
+  font-family: var(--font-accent);
+
+  letter-spacing: .35em;
+
+  text-transform: uppercase;
+
+  font-size: 1rem;
+
+  border:
+    1px solid #FFFFFF;
+
+  padding: .75rem 2rem;
+
+  color: #FFFFFF;
+
+  text-decoration: none;
+
+  display: inline-block;
+
+  transition: .2s;
+
+  background: transparent;
+
+  box-shadow:
+    0 4px 12px
+    rgba(60,45,20,.12);
+
+  font-weight: 700;
+}
+
+.btn:hover {
+
+  background: #FFFFFF;
+
+  color: #f5f2ec;
+
+  box-shadow:
+    0 6px 18px
+    rgba(60,45,20,.18);
+}
+
+.btn-row {
+
+  margin-top: 2.5rem;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 1rem;
+
+  align-items: center;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card {
+
+  margin-top: 2.5rem;
+
+  border:
+    1px solid
+    var(--cfont-border);
+
+  padding:
+    1.5rem 2rem;
+
+  color: #FFFFFF;
+
+  background: transparent;
+
+  box-shadow:
+    0 6px 18px
+    var(--cfont-shadow);
+
+  border-radius: 12px;
+}
+
+.card p {
+  color: #FFFFFF !important;
+}
+
+
+/* =========================================================
+   SWIPER / GALERÍA
+========================================================= */
+
+.momentosSwiper {
+
+  width: 100%;
+
+  margin-top: 2rem;
+
+  padding-bottom: 3rem;
+}
+
+.swiper-slide {
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 8px 24px
+    rgba(60,45,20,.18);
+}
+
+.swiper-slide img {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  aspect-ratio: 4 / 5;
+
+  display: block;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+
+  color: #FFFFFF;
+}
+
+.swiper-pagination-bullet {
+
+  background: #FFFFFF;
+
+  opacity: .6;
+}
+
+.swiper-pagination-bullet-active {
+
+  background: #FFFFFF;
+
+  opacity: 1;
+}
+
+
+/* =========================================================
+   CELEBRACIÓN
+========================================================= */
+
+.celebration-time {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: .5rem;
+
+  flex-wrap: wrap;
+
+  color: #FFFFFF;
+}
+
+.celebration-time .display {
+
+  font-family: var(--font-accent);
+}
+
+.celebration-time .until {
+
+  margin:
+    0 .15rem;
+}
+
+
+/* =========================================================
+   FORMULARIO
+========================================================= */
+
+form {
+
+  margin-top: 2.5rem;
+
+  width: 100%;
+
+  max-width: 30rem;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 1.5rem;
+
+  text-align: left;
+
+  font-size: 1.25rem;
+}
+
+
+/* Etiquetas */
+
+form label.f > span {
+
+  color: #FFFFFF;
+
+  letter-spacing: .08em;
+
+  font-size: 1.1rem;
+
+  font-weight: 600;
+
+  text-transform: none;
+}
+
+
+/* Inputs */
+
+form input[type="text"] {
+
+  width: 100%;
+
+  border: none;
+
+  border-bottom:
+    2px solid
+    rgba(255,255,255,.7);
+
+  background: transparent;
+
+  padding: .6rem 0;
+
+  color: #FFFFFF;
+
+  outline: none;
+
+  font: inherit;
+
+  font-weight: 600;
+}
+
+form input[type="text"]::placeholder {
+
+  color:
+    rgba(255,255,255,.65);
+}
+
+form input[type="text"]:focus {
+
+  border-color: #FFFFFF;
+}
+
+
+/* =========================================================
+   RADIOS
+========================================================= */
+
+.radios {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: .8rem;
+
+  color: #FFFFFF;
+
+  font-size: 1.25rem;
+
+  font-weight: 600;
+}
+
+.radios label {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: .8rem;
+
+  color: #FFFFFF;
+}
+
+.radios input[type="radio"] {
+
+  accent-color: var(--celeste);
+}
+
+.radio-title {
+
+  color: #FFFFFF;
+
+  font-size: 1.1rem;
+
+  font-weight: 600;
+
+  margin-bottom: .3rem;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 1rem;
+
+  padding: 4rem 1.5rem;
+
+  text-align: center;
+
+  background: transparent;
+
+  color: #FFFFFF;
+}
+
+.footer-icon {
+
+  width: 70px;
+  height: 70px;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(255,255,255,.7);
+
+  box-shadow:
+    0 5px 18px
+    rgba(40,55,75,.15);
+}
+
+.footer-icon img {
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (min-width: 768px) {
+
+  h1.name {
+    font-size: 7rem;
+  }
+
+  .amp-big {
+    font-size: 3.75rem;
+  }
+
+  .quote {
+    font-size: 3rem;
+  }
+
+  .countdown {
+    gap: 2.5rem;
+  }
+
+  .countdown .v {
+    font-size: 3rem;
+  }
+
+  .btn-row {
+    flex-direction: row;
+  }
+
+  .leaves svg,
+  .deco svg {
+    width: 6rem;
+  }
+
+  .section-icon {
+    width: 95px;
+    height: 95px;
+  }
+
+  .save-date-text {
+    font-size: 1.55rem;
+  }
+
+  .save-date-date {
+    font-size: 1.8rem;
+  }
+}
+
+
+@media (min-width: 1024px) {
+
+  section p {
+    font-size: 1.55rem;
+  }
+
+  .quote {
+    font-size: 5rem !important;
+  }
+
+  .display {
+    font-size: 1.4rem;
+  }
+
+  .btn {
+    font-size: 1rem;
+  }
+
+  .section-icon {
+    width: 105px;
+    height: 105px;
+  }
+
+  .heart-ornament {
+    width: 16rem;
+  }
+
+  .save-date-text {
+    max-width: 750px;
+    font-size: 1.6rem;
+  }
+
+  .calendar-image {
+    width: min(550px, 80%);
+  }
+}
+
+
+/* =========================================================
+   BOTÓN MÚSICA FLOTANTE
+========================================================= */
+
+.music-btn {
+
+  position: fixed;
+
+  right: 24px;
+  bottom: 24px;
+
+  width: 54px;
+  height: 54px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255, 255, 255, 0.75);
+
+  /* Fondo blanco */
+  background: #FFFFFF;
+
+  /* Color del contenido */
+  color: var(--celeste);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  z-index: 9999;
+
+  padding: 0;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.12);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease;
+}
+
+
+/* =========================================================
+   CUANDO SE MUESTRA
+========================================================= */
+
+.music-btn.show {
+
+  opacity: 1;
+  visibility: visible;
+
+}
+
+
+/* =========================================================
+   AL PASAR EL MOUSE
+========================================================= */
+
+.music-btn:hover {
+
+  transform: scale(1.05);
+
+  /* Mantiene el fondo blanco */
+  background: #FFFFFF;
+
+}
+
+
+/* =========================================================
+   AL PRESIONAR
+========================================================= */
+
+.music-btn:active {
+
+  transform: scale(0.95);
+
+}
+
+
+/* =========================================================
+   ICONO
+========================================================= */
+
+.music-icon {
+
+  position: relative;
+
+  width: 20px;
+  height: 20px;
+
+  display: block;
+
+}
+
+
+/* =========================================================
+   PAUSA
+========================================================= */
+
+.music-btn.is-playing .music-icon::before,
+.music-btn.is-playing .music-icon::after {
+
+  content: "";
+
+  position: absolute;
+
+  top: 3px;
+
+  width: 5px;
+  height: 14px;
+
+  background: var(--celeste);
+
+  border-radius: 1px;
+
+}
+
+
+.music-btn.is-playing .music-icon::before {
+
+  left: 3px;
+
+}
+
+
+.music-btn.is-playing .music-icon::after {
+
+  right: 3px;
+
+}
+
+
+/* =========================================================
+   PLAY
+========================================================= */
+
+.music-btn:not(.is-playing) .music-icon::before {
+
+  content: "";
+
+  position: absolute;
+
+  left: 5px;
+  top: 2px;
+
+  width: 0;
+  height: 0;
+
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+
+  border-left: 12px solid var(--celeste);
+
+}
+
+
+/* =========================================================
+   MÓVIL
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .music-btn {
+
+    width: 54px;
+    height: 54px;
+
+    right: 18px;
+    bottom: 18px;
+
+  }
+
+}
+
+/* =========================================================
+   COLORES DE VESTIMENTA
+========================================================= */
+
+.dress-colors {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: clamp(1rem, 4vw, 2.5rem);
+
+  width: 100%;
+  max-width: 500px;
+
+  margin-top: 1.5rem;
+
+  padding: 0 1rem;
+}
+
+.dress-color {
+  width: clamp(52px, 11vw, 78px);
+  aspect-ratio: 1 / 1;
+
+  border-radius: 50%;
+
+  flex: 0 1 auto;
+
+  box-shadow:
+    0 6px 15px rgba(40, 55, 75, .15);
+}
+
+.color-1 {
+  background: #FEFEFE;
+  border: 1px solid rgba(40, 55, 75, .15);
+}
+
+.color-2 {
+  background: #FBF1E5;
+}
+
+.color-3 {
+  background: #AACAF0;
+}
